@@ -11,57 +11,62 @@ exec ./a.out
 #include <stdint.h>
 #include <stdbool.h>
 
-static int64_t landCount = 0;
-static int64_t planCount = 0;
+static uint64_t landCount = 0;
+static uint64_t planCount = 0;
 
 struct plan_entry {
-  int64_t planSize;
-  int64_t statisfiedCount;
+  uint64_t planSize;
+  uint64_t statisfiedCount;
 };
 
-int64_t calc_land_size(int64_t landID) {
-  return (landID & 1) ? (landID >> 1) + 1 : landCount + 1 - (landID >> 1);
-}
-
-bool is_usable(int64_t startLand, int64_t size) {
-  int64_t totalSize = 0;
-  for (int64_t i = startLand; totalSize < size && i <= landCount; i++)
-    totalSize += calc_land_size(i);
-  return totalSize == size;
+static inline uint64_t calc_land_size(uint64_t landID) {
+  return (landID & 1LL) ? (landID >> 1LL) + 1LL : landCount + 1LL - (landID >> 1LL);
 }
 
 int main() {
-  if (scanf("%" SCNi64 " %" SCNi64 "", &landCount, &planCount) != 2)
+  if (scanf("%" SCNu64 " %" SCNu64 "", &landCount, &planCount) != 2)
     abort();
   
   // printf("Land count: %d\n", landCount);
   // printf("Plan count: %d\n", planCount);
   
-  // for (int64_t i = 1; i <= landCount; i++)
+  // for (uint64_t i = 1; i <= landCount; i++)
   //   printf("|%d", calc_land_size(i));
   // printf("|\n");
   
   struct plan_entry* plans = malloc(sizeof(*plans) * planCount);
   if (!plans)
-    abort();
+   abort();
   
-  for (int64_t i = 0; i < planCount; i++) {
+  uint64_t maxLength = 0;
+  for (uint64_t i = 0; i < planCount; i++) {
     plans[i] = (struct plan_entry) {};
-    scanf("%" SCNi64, &plans[i].planSize);
+    scanf("%" SCNu64, &plans[i].planSize);
+    
+    if (plans[i].planSize > maxLength)
+      maxLength = plans[i].planSize;
   }
   
-  for (int64_t i = 1; i <= landCount; i++) {
-    for (int64_t j = 0; j < planCount; j++) {
-      struct plan_entry* entry = &plans[j];
-      if (is_usable(i, entry->planSize))
-        entry->statisfiedCount++;
+  for (uint64_t i = 1; i <= landCount; i++) {
+    uint64_t length = 0;
+    for (uint64_t landID = i; length <= maxLength && landID <= landCount; landID++) {
+      length += calc_land_size(landID);
+      if (length > maxLength)
+        break;
+      
+      for (uint64_t i = 0; i < planCount; i++) {
+        if (plans[i].planSize == length) {
+          plans[i].statisfiedCount++;
+        }
+      }
     }
   }
   
-  for (int64_t i = 0; i < planCount; i++) {
+  for (uint64_t i = 0; i < planCount; i++) {
     //printf("Hello: plans[%d] = {%d, %d}\n", i, plans[i].planSize, plans[i].statisfiedCount);
-    printf("%" PRIi64 "\n", plans[i].statisfiedCount);
+    printf("%" PRIu64 "\n", plans[i].statisfiedCount);
   }
+  
   free(plans);
 }
 
