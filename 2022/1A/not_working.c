@@ -33,6 +33,23 @@ static int compare_by_size(const void* _a, const void* _b) {
   return 0;
 }
 
+// In place deduplication
+static size_t dedup_plans(struct plan_entry** plans, size_t count) {
+  size_t newCount = count;
+  struct plan_entry** writeHead = plans;
+  struct plan_entry** readHead = plans;
+  struct plan_entry** end = plans + count;
+  while (readHead < end) {
+    if (*readHead != *writeHead) {
+      writeHead++;
+      *writeHead = *readHead;
+    }
+    readHead++;
+  }
+  
+  return newCount;
+}
+
 int main() {
   if (scanf("%" SCNi64 " %" SCNi64 "", &landCount, &planCount) != 2)
     abort();
@@ -52,7 +69,7 @@ int main() {
       maxLength = plans[i].planSize;
   }
   qsort(planSortedBySize, planCount, sizeof(*planSortedBySize), compare_by_size);
-  size_t deduplicatedPlanCount = planCount;
+  size_t deduplicatedPlanCount = dedup_plans(planSortedBySize, planCount);
   
   struct plan_entry toSearch = {};
   const struct plan_entry* const toSearchPtr = &toSearch;

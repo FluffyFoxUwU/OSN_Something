@@ -1,5 +1,5 @@
 #if 0
-gcc -fsanitize=address -static-libasan  -O2 -Wall main.c 
+gcc -fsanitize=address -static-libasan -g -O2 -Wall main.c 
 exec ./a.out
 #endif
 
